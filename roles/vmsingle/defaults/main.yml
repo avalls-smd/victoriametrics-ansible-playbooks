@@ -15,6 +15,7 @@ victoriametrics_data_dir: "/var/lib/victoria-metrics/"
 victoriametrics_self_scrape_interval: "30s"
 victoriametrics_retention_period_months: "12"
 victoriametrics_search_max_unique_timeseries: "900000"
+victoriametrics_config_dir: "/etc/victoriametrics"
 
 # more on envflags usage
 # https://docs.victoriametrics.com/Single-server-VictoriaMetrics.html#environment-variables
@@ -31,6 +32,7 @@ victoriametrics_service_args:
   retentionPeriod: "{{ victoriametrics_retention_period_months }}"
   maxConcurrentInserts: 32
   "search.maxUniqueTimeseries": "{{ victoriametrics_search_max_unique_timeseries }}"
+  "promscrape.config": "{{ victoriametrics_config_dir }}/config.yml"
 
 victoriametrics_max_open_files: 2097152
 victoriametrics_backup_proxy_enable: false

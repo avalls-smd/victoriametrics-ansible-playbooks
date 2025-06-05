@@ -18,6 +18,23 @@
       notify: Restart VictoriaMetrics service
       when: envfile_state.stat.exists is defined and not envfile_state.stat.exists
 
+- name: Prepare configuration dir
+  ansible.builtin.file:
+    state: directory
+    path: "{{ victoriametrics_config_dir }}"
+    mode: 0751
+    owner: "{{ victoriametrics_system_user }}"
+    group: "{{ victoriametrics_system_group }}"
+
+- name: Configure promscrape config
+  ansible.builtin.template:
+    src: prometheus_scrape.yml.j2
+    dest: "{{ victoriametrics_config_dir }}/config.yml"
+    mode: 0751
+    owner: "{{ victoriametrics_system_user }}"
+    group: "{{ victoriametrics_system_group }}"
+  register: config_promscrape
+
 - name: Copy VictoriaMetrics systemd unit file
   ansible.builtin.template:
     src: victoriametrics.service.j2
@@ -34,8 +51,8 @@
   ansible.builtin.systemd:
     daemon_reload: true
     name: victoriametrics
-  when: config_template is changed  # noqa: no-handler
-  changed_when: config_template is changed
+  when: config_template is changed or config_promscrape is changed # noqa: no-handler
+  changed_when: config_template is changed or config_promscrape is changed
 
 - name: Ensure VictoriaMetrics service is enabled on boot
   become: true
