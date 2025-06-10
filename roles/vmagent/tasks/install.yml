@@ -74,27 +74,33 @@
   when: not vmagent_install_download_to_control
   block:
   - name: Download and unarchive VMagent release binary
+    notify: Restart VMagent service
     environment:
       http_proxy: "{{ vm_proxy_http }}"
       https_proxy: "{{ vm_proxy_https }}"
     ansible.builtin.unarchive:
       src: "{{ vmagent_download_url }}"
-      dest: /tmp
+      dest: /usr/local/bin/
       remote_src: yes
-      extra_opts:
-      - --no-same-owner
+      include:
+        - "vmagent-prod"
+      mode: "0751"
+      owner: "{{ vmagent_system_user }}"
+      group: "{{ vmagent_system_group }}"
+      # extra_opts:
+      # - --no-same-owner
     when:
     - not ansible_check_mode
     - not vmagent_is_installed.stat.exists or
       vmagent_version not in vmagent_current_version.stdout
 
-  - name: Replace vmagent binary at target dir # noqa: no-changed-when
-    notify: Restart VMagent service
-    ansible.builtin.shell: |
-      mv /tmp/vmagent-prod /usr/local/bin/vmagent-prod
-      chmod 0751 /usr/local/bin/vmagent-prod
-      chown {{ vmagent_system_user }}:{{ vmagent_system_group }} /usr/local/bin/vmagent-prod
-    when:
-    - not ansible_check_mode
-    - not vmagent_is_installed.stat.exists or
-      vmagent_version not in vmagent_current_version.stdout
+  # - name: Replace vmagent binary at target dir # noqa: no-changed-when
+  #   notify: Restart VMagent service
+  #   ansible.builtin.shell: |
+  #     mv /tmp/vmagent-prod /usr/local/bin/vmagent-prod
+  #     chmod 0751 /usr/local/bin/vmagent-prod
+  #     chown {{ vmagent_system_user }}:{{ vmagent_system_group }} /usr/local/bin/vmagent-prod
+  #   when:
+  #   - not ansible_check_mode
+  #   - not vmagent_is_installed.stat.exists or
+  #     vmagent_version not in vmagent_current_version.stdout
