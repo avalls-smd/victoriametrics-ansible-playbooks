@@ -64,7 +64,7 @@
     backup: yes
   notify: Restart VMalert service
   tags: notest # skip in molecule since there is no valid license provided in tests
-  when: not vic_vm_alert_rules_glob
+  when: vic_vm_alert_rules_glob is not defined
 
 - name: Configure alerts config with multiple files
   ansible.builtin.template:
